@@ -21,7 +21,7 @@ namespace Part_1
 
         public Map(int numberOfBuildings)
         {
-            int size = Program.UI.grbMap.Size.Height / 21;
+            int size = Program.UI.grbMap.Size.Height / 21 ;
             for (int i = 0; i < numberOfBuildings; i++)
             {
                 buildingButton.Add(new ButtonBuilding(CreateBuilding(i % 2)));
