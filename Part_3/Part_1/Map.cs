@@ -13,21 +13,41 @@ namespace Part_1
     [Serializable]
     class Map
     {
-        public object[,] map = new Unit[20, 20];
+        public Unit[,] map = new Unit[20, 20];
         public List<Unit> units = new List<Unit>();
         public List<ButtonUnit> unitButton = new List<ButtonUnit>();
         public List<ButtonBuilding> buildingButton = new List<ButtonBuilding>();
+        private int xSize, ySize;
+
+        public int XSize
+        {
+            get { return xSize; }
+        }
+        public int YSize
+        {
+            get { return ySize; }
+        }
 
         Random rand = new Random();
 
-        public Map(int numberOfBuildings)
+        public Map(int numberOfBuildings, int xSize, int ySize)
         {
-            int size = Program.UI.grbMap.Size.Height / 21;
+            this.xSize = xSize;
+            this.ySize = ySize;
+
+            map = new Unit[XSize, YSize];
+
             for (int i = 0; i < numberOfBuildings; i++)
             {
                 AddBuilding(CreateBuilding(i % 2));
+                CreateWizzard();
             }
             DisplayAll();
+        }
+
+        private void CreateWizzard()
+        {
+            
         }
 
         // Both the type of unit, as well as their X and Y position, should be randomised; 
@@ -37,8 +57,8 @@ namespace Part_1
         // method returns a unit after creating it and assigning valuse to it
         public Building CreateBuilding(int team)
         {
-            int xPos = rand.Next(0, 20);
-            int yPos = rand.Next(0, 20);
+            int xPos = rand.Next(0, XSize);
+            int yPos = rand.Next(0, YSize);
             while (true)
             {
                 if (map[xPos, yPos] == null)
@@ -78,12 +98,12 @@ namespace Part_1
         // updates the position of the unit so it doesnt need to update the entire GUI
         public void UpDatePosition()
         {
-            int Ysize = Program.UI.grbMap.Height / 20;
-            int Xsize = Program.UI.grbMap.Width / 20;
+            int Ysize = Program.UI.grbMap.Height / YSize;
+            int Xsize = Program.UI.grbMap.Width / XSize;
 
             for (int i = 0; i < unitButton.Count; i++)
             {
-                unitButton[i].SetBounds(unitButton[i].Unit.XPos * Xsize + 3, unitButton[i].Unit.YPos * Ysize + 3, Xsize, Ysize);
+                unitButton[i].SetBounds(unitButton[i].Unit.XPos * Xsize , unitButton[i].Unit.YPos * Ysize , Xsize, Ysize);
                 unitButton[i].Text = unitButton[i].Unit.Symbol;
                 unitButton[i].Refresh();
             }
@@ -92,24 +112,29 @@ namespace Part_1
         // CREATES A BUTTON AND ADDS THGE UNIT TO THE LIST OF UNIT BUTTONS
         public void AddUnit(Unit u)
         {
-            int size = Program.UI.grbMap.Size.Height / 21;
+            int Ysize = Program.UI.grbMap.Height / YSize;
+            int Xsize = Program.UI.grbMap.Width / XSize;
 
             unitButton.Add(new ButtonUnit(u));
             unitButton[unitButton.Count - 1].ForeColor = (unitButton[unitButton.Count - 1].Unit.Team == 0) ? Color.Blue : Color.Red;
-            unitButton[unitButton.Count - 1].SetBounds(unitButton[unitButton.Count - 1].Unit.XPos * size, unitButton[unitButton.Count - 1].Unit.YPos * size, size, size);
+            unitButton[unitButton.Count - 1].SetBounds(unitButton[unitButton.Count - 1].Unit.XPos * Xsize, unitButton[unitButton.Count - 1].Unit.YPos * Ysize, Xsize, Ysize);
             unitButton[unitButton.Count - 1].Click += Button_Clicked;
+
             Program.UI.grbMap.Controls.Add(unitButton[unitButton.Count - 1]);
         }
 
         // creates a button for a building that is added to the simulation
         public void AddBuilding(Building b)
         {
-            int size = Program.UI.grbMap.Size.Height / 21;
+            int Ysize = Program.UI.grbMap.Height / YSize;
+            int Xsize = Program.UI.grbMap.Width / XSize;
 
             buildingButton.Add(new ButtonBuilding(b));
             buildingButton[buildingButton.Count - 1].Text = buildingButton[buildingButton.Count - 1].Building.Symbol;
             buildingButton[buildingButton.Count - 1].ForeColor = (buildingButton[buildingButton.Count - 1].Building.Team == 0) ? Color.Blue : Color.Red;
-            buildingButton[buildingButton.Count - 1].SetBounds(buildingButton[buildingButton.Count - 1].Building.XPos * size, buildingButton[buildingButton.Count - 1].Building.YPos * size, size, size);
+            buildingButton[buildingButton.Count - 1].SetBounds(buildingButton[buildingButton.Count - 1].Building.XPos * Xsize, buildingButton[buildingButton.Count - 1].Building.YPos * Ysize, Xsize, Ysize);
+
+            Program.UI.grbMap.Controls.Add(buildingButton[buildingButton.Count - 1]);
         }
 
         protected void Button_Clicked(object sender, EventArgs e)

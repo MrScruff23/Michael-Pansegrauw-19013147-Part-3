@@ -12,7 +12,7 @@ namespace Part_1
     {
 
         public static int rounds = 0; // varaible to keep track of the amount of rounds that have passed
-        static int numOfEnemies = 12; // variable to dectate the amount of units that need to be spawned
+        static int numOdBuildings = 12; // variable to dectate the amount of units that need to be spawned
         public static Map map; // creates an object of the map class
         static bool initialised = false; // tells the class if variables are initialised before trying to use them
 
@@ -21,7 +21,7 @@ namespace Part_1
         {
             if (initialised == false)
             {
-                map = new Map(numOfEnemies);
+                SetMapSize(20, 20);
                 initialised = true;
             }
             // Unit round actions ***************************************************************************************************************************
@@ -35,21 +35,16 @@ namespace Part_1
                     {
                         unit = u as MeeleeUnit;
                     }
-                    else
+                    else if (u.GetType() == typeof(RangedUnit))
                     {
                         unit = u as RangedUnit;
+                    } else
+                    {
+                        unit = u as WizzardUnit;
                     }
 
                     Unit enemy = unit.FindClosestUnit(map.unitButton);
                     if (enemy != null) // checks the type of unit and if there is a unit
-                        if (enemy.GetType() == typeof(MeeleeUnit))
-                        {
-                            enemy = enemy as MeeleeUnit;
-                        }
-                        else
-                        {
-                            enemy = enemy as RangedUnit;
-                        }
 
                     if (!unit.DestroyUnit()) // checks if the unit is alive
                     {
@@ -59,9 +54,36 @@ namespace Part_1
                             {
                                 try
                                 {
-                                    unit.IsAttacking = true;
-                                    enemy.Combat(u.Attack);
-                                    enemy.DestroyUnit();
+                                        if (u.GetType() == typeof(WizzardUnit)) {
+                                            unit.IsAttacking = true;
+                                            enemy.Combat(Convert.ToDouble(u.Attack));
+                                            enemy.DestroyUnit();
+                                        } else
+                                        {
+                                            // allows the wizard to do AOE (area oif effect) damage
+                                            for (int i = unit.XPos - 1; i <= unit.XPos + 1; i++)
+                                            {
+                                                for (int ii = unit.YPos - 1; ii <= unit.YPos + 1; ii++)
+                                                {
+                                                    try
+                                                    {
+                                                        Unit targets;
+                                                        if (u.GetType() == typeof(MeeleeUnit)) //  gets the type of unit
+                                                        {
+                                                            targets = map.map[i, ii] as MeeleeUnit;
+                                                        }
+                                                        else
+                                                        {
+                                                            targets = map.map[i, ii] as RangedUnit;
+                                                        }
+                                                        targets.Combat(Convert.ToDouble(unit.Attack));
+                                                    } catch (Exception ex)
+                                                    {
+                                                        Console.WriteLine(ex);
+                                                    }
+                                                }
+                                            }
+                                        }
                                 }
                                 catch (Exception ex)
                                 {
@@ -122,7 +144,13 @@ namespace Part_1
             rounds++;
             Program.UI.RoundUpdate(rounds);
         }
-        
+
+        internal static void SetMapSize(int xSize, int ySize)
+        {
+            map = new Map(numOdBuildings, xSize, ySize);
+            initialised = true;
+        }
+
         public static bool Save() // returns a boolean value for indication to whether the process was successful or not
         {
             try

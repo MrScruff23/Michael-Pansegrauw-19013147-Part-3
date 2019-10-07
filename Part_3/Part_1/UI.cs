@@ -17,6 +17,8 @@ namespace Part_1
         // variables to keep track of the amount of resources 
         private int team1resources = 0;
         private int team2resources = 0;
+        public bool start = false, xReady = false, yReady = false;
+
 
         public UI()
         {
@@ -40,7 +42,19 @@ namespace Part_1
 
         private void BtnStart_Click(object sender, EventArgs e) // When the start button is clicked the timer will bet resumed to resume the animation
         {
-            timer1.Enabled = true;
+            if (yReady == true && xReady == true)
+            {
+                timer1.Enabled = true;
+                txtXSize.Visible = false;
+                txtYSize.Visible = false;
+                lblXSize.Visible = false;
+                lblYSize.Visible = false;
+                if (start == false)
+                {
+                    GameEngine.SetMapSize(Convert.ToInt32(txtXSize.Text), Convert.ToInt32(txtYSize.Text));
+                    start = true;
+                }
+            }
         }
 
         public void RoundUpdate(int rounds) // updates the number of rounds that have passed
@@ -64,6 +78,12 @@ namespace Part_1
             }
         }
 
+        // getting of team resource
+        public int GetResources (int team)
+        {
+            return (team == 0) ? team1resources: team2resources;
+        }
+
         // calls save method for the game
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -80,6 +100,68 @@ namespace Part_1
         private void grbMap_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        // validates the input of the text box
+        private void txtYSize_TextChanged(object sender, EventArgs e)
+        {
+            if (timer1.Enabled != true)
+                try
+                {
+                    yReady = false;
+                    int i = Convert.ToInt32(txtYSize.Text);
+                    if (i >= 5 && i <= 50 && txtYSize.Text.Length > 0)
+                    {
+                        txtYSize.BackColor = Color.LightGreen;
+                        txtUnitInfo.Text = "";
+                        yReady = true;
+                    }
+                    else
+                    {
+                        txtYSize.BackColor = Color.LightPink;
+                        if (timer1.Enabled != true)
+                        {
+                            txtUnitInfo.Text = "y map size is not with in the range of 5 to 50";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    txtUnitInfo.Text = "The value entered is unusable";
+                    txtYSize.BackColor = Color.LightPink;
+                }
+        }
+
+        // validates the input of the text box
+        private void txtXSize_TextChanged(object sender, EventArgs e)
+        {
+            if (timer1.Enabled != true)
+                try
+                {
+                    xReady = false;
+                    int i = Convert.ToInt32(txtXSize.Text);
+                    if (i >= 5 && i <= 50 && txtXSize.Text.Length > 0)
+                    {
+                        txtXSize.BackColor = Color.LightGreen;
+                        txtUnitInfo.Text = "";
+                        xReady = true;
+                    }
+                    else
+                    {
+                        txtXSize.BackColor = Color.LightPink;
+                        if (timer1.Enabled != true)
+                        {
+                            txtUnitInfo.Text = "X map size is not with in the range of 5 to 50";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    txtUnitInfo.Text = "The value entered is unusable";
+                    txtXSize.BackColor = Color.LightPink;
+                }
         }
     }
 }
