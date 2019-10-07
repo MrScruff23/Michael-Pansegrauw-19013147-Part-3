@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace Part_1
 {
+    [Serializable]
     class Map
     {
         public object[,] map = new Unit[20, 20];
@@ -21,13 +22,10 @@ namespace Part_1
 
         public Map(int numberOfBuildings)
         {
-            int size = Program.UI.grbMap.Size.Height / 21 ;
+            int size = Program.UI.grbMap.Size.Height / 21;
             for (int i = 0; i < numberOfBuildings; i++)
             {
-                buildingButton.Add(new ButtonBuilding(CreateBuilding(i % 2)));
-                buildingButton[buildingButton.Count - 1].Text = buildingButton[buildingButton.Count - 1].Building.Symbol;
-                buildingButton[buildingButton.Count - 1].ForeColor = (buildingButton[buildingButton.Count - 1].Building.Team == 0) ? Color.Blue : Color.Red;
-                buildingButton[buildingButton.Count - 1].SetBounds(buildingButton[buildingButton.Count - 1].Building.XPos * size, buildingButton[buildingButton.Count - 1].Building.YPos * size, size, size);
+                AddBuilding(CreateBuilding(i % 2));
             }
             DisplayAll();
         }
@@ -35,6 +33,8 @@ namespace Part_1
         // Both the type of unit, as well as their X and Y position, should be randomised; 
         // Meelee: int xPos, int yPos, double maxHealth, double attack, int team
         // Ranged: int xPos, int yPos, double maxHealth, double attack, int team
+
+        // method returns a unit after creating it and assigning valuse to it
         public Building CreateBuilding(int team)
         {
             int xPos = rand.Next(0, 20);
@@ -59,8 +59,10 @@ namespace Part_1
             }
         }
 
+        // displays the units onto the GUI
         public void DisplayAll()
         {
+            Program.UI.grbMap.Controls.Clear();
             foreach (Button butt in buildingButton)
             {
                 Program.UI.grbMap.Controls.Add(butt);
@@ -73,6 +75,7 @@ namespace Part_1
             Program.UI.txtUnitInfo.Text = butt.Unit.ToString();
         }
 
+        // updates the position of the unit so it doesnt need to update the entire GUI
         public void UpDatePosition()
         {
             int Ysize = Program.UI.grbMap.Height / 20;
@@ -86,68 +89,26 @@ namespace Part_1
             }
         }
 
-        public bool Save() // returns a boolean value for indication to whether the process was successful or not
-        {
-            try
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                using (FileStream fs = new FileStream("unit.dat", FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    bf.Serialize(fs, unitButton);
-                    Console.WriteLine("saved units!");
-                }
-                using (FileStream fs = new FileStream("building.dat", FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    bf.Serialize(fs, buildingButton);
-                    Console.WriteLine("saved buildings!");
-                }
-                using (FileStream fs = new FileStream("map.dat", FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    bf.Serialize(fs, buildingButton);
-                    Console.WriteLine("saved buildings!");
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return false;
-            }
-        }
-
-        public bool Load() // returns a boolean value for indication to whether the process was successful or not
-        {
-            try
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                using (FileStream f = new FileStream("unit.dat", FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    unitButton = (List<ButtonUnit>)bf.Deserialize(f);
-                    Console.WriteLine("unit Buttons loaded");
-                }
-                using (FileStream f = new FileStream("building.dat", FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    buildingButton = (List<ButtonBuilding>)bf.Deserialize(f);
-                    Console.WriteLine("unit Buttons loaded");
-                }
-                using (FileStream f = new FileStream("map.dat", FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    map = (object[,])bf.Deserialize(f);
-                    Console.WriteLine("unit Buttons loaded");
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return false;
-            }
-        }
-
+        // CREATES A BUTTON AND ADDS THGE UNIT TO THE LIST OF UNIT BUTTONS
         public void AddUnit(Unit u)
         {
+            int size = Program.UI.grbMap.Size.Height / 21;
+
             unitButton.Add(new ButtonUnit(u));
+            unitButton[unitButton.Count - 1].ForeColor = (unitButton[unitButton.Count - 1].Unit.Team == 0) ? Color.Blue : Color.Red;
+            unitButton[unitButton.Count - 1].SetBounds(unitButton[unitButton.Count - 1].Unit.XPos * size, unitButton[unitButton.Count - 1].Unit.YPos * size, size, size);
             Program.UI.grbMap.Controls.Add(unitButton[unitButton.Count - 1]);
+        }
+
+        // creates a button for a building that is added to the simulation
+        public void AddBuilding(Building b)
+        {
+            int size = Program.UI.grbMap.Size.Height / 21;
+
+            buildingButton.Add(new ButtonBuilding(b));
+            buildingButton[buildingButton.Count - 1].Text = buildingButton[buildingButton.Count - 1].Building.Symbol;
+            buildingButton[buildingButton.Count - 1].ForeColor = (buildingButton[buildingButton.Count - 1].Building.Team == 0) ? Color.Blue : Color.Red;
+            buildingButton[buildingButton.Count - 1].SetBounds(buildingButton[buildingButton.Count - 1].Building.XPos * size, buildingButton[buildingButton.Count - 1].Building.YPos * size, size, size);
         }
     }
 
